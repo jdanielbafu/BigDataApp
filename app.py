@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+import zipfile
 import os
 from datetime import datetime
+import json
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
@@ -76,7 +78,7 @@ def login():
     
     return render_template('login.html', version=VERSION_APP,creador=CREATOR_APP)
 
-@app.route('/gestion-mongodb')
+@app.route('/gestion_proyecto')
 def gestion_proyecto():
     if 'usuario' not in session:
         return redirect(url_for('login'))
@@ -109,12 +111,14 @@ def gestion_proyecto():
                             selected_db=selected_db,
                             collections_data=collections_data,
                             version=VERSION_APP,
-                            creador=CREATOR_APP)
+                            creador=CREATOR_APP,
+                            usuario=session['usuario'])
     except Exception as e:
         return render_template('gestion/index.html',
                             error_message=f'Error al conectar con MongoDB: {str(e)}',
                             version=VERSION_APP,
-                            creador=CREATOR_APP)
+                            creador=CREATOR_APP,
+                            usuario=session['usuario'])
 
 @app.route('/logout')
 def logout():
@@ -145,6 +149,96 @@ def listar_usuarios():
         return jsonify(usuarios)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    finally:
+        if 'client' in locals():
+            client.close()
+
+@app.route('/crear-coleccion-form/<database>')
+def crear_coleccion_form(database):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    return render_template('gestion/crear_coleccion.html', 
+                         database=database,
+                         usuario=session['usuario'],
+                         version=VERSION_APP,
+                         creador=CREATOR_APP)
+
+@app.route('/crear-coleccion', methods=['POST'])
+def crear_coleccion():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    try:
+        database = request.form.get('database')
+        collection_name = request.form.get('collection_name')
+        zip_file = request.files.get('zip_file')
+        
+        if not all([database, collection_name, zip_file]):
+            return render_template('gestion/crear_coleccion.html',
+                                error_message='Todos los campos son requeridos',
+                                database=database,
+                                usuario=session['usuario'],
+                                version=VERSION_APP,
+                                creador=CREATOR_APP)
+        
+        # Conectar a MongoDB
+        client = connect_mongo()
+        if not client:
+            return render_template('gestion/crear_coleccion.html',
+                                error_message='Error de conexión con MongoDB',
+                                database=database,
+                                usuario=session['usuario'],
+                                version=VERSION_APP,
+                                creador=CREATOR_APP)
+        
+        # Crear la colección
+        db = client[database]
+        collection = db[collection_name]
+        
+        # Procesar el archivo ZIP
+        with zipfile.ZipFile(zip_file) as zip_ref:
+            # Crear un directorio temporal para extraer los archivos
+            temp_dir = os.path.join(os.path.dirname(__file__), 'temp')
+            os.makedirs(temp_dir, exist_ok=True)
+            
+            # Extraer los archivos
+            zip_ref.extractall(temp_dir)
+            
+            # Procesar cada archivo JSON
+            for root, _, files in os.walk(temp_dir):
+                for file in files:
+                    if file.endswith('.json'):
+                        file_path = os.path.join(root, file)
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            try:
+                                json_data = json.load(f)
+                                # Si el JSON es una lista, insertar cada elemento
+                                if isinstance(json_data, list):
+                                    collection.insert_many(json_data)
+                                else:
+                                    collection.insert_one(json_data)
+                            except json.JSONDecodeError:
+                                print(f"Error al procesar el archivo {file}")
+                            except Exception as e:
+                                print(f"Error al insertar datos del archivo {file}: {str(e)}")
+            
+            # Limpiar el directorio temporal
+            for root, dirs, files in os.walk(temp_dir, topdown=False):
+                for file in files:
+                    os.remove(os.path.join(root, file))
+                for dir in dirs:
+                    os.rmdir(os.path.join(root, dir))
+            os.rmdir(temp_dir)
+        
+        return redirect(url_for('gestion_proyecto', database=database))
+        
+    except Exception as e:
+        return render_template('gestion/crear_coleccion.html',
+                            error_message=f'Error al crear la colección: {str(e)}',
+                            database=database,
+                            usuario=session['usuario'],
+                            version=VERSION_APP,
+                            creador=CREATOR_APP)
     finally:
         if 'client' in locals():
             client.close()
