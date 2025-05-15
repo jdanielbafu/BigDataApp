@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
 
 # Versión de la aplicación
-VERSION_APP = "Versión 1.1 del Mayo 15 del 2025"
+VERSION_APP = "Versión 1.2 del Mayo 15 del 2025"
 #
 CREATOR_APP = "Nombre del creador/ruta github"
 
@@ -107,10 +107,21 @@ def gestion_mongodb():
         return render_template('gestion/index.html',
                             databases=databases,
                             selected_db=selected_db,
-                            collections_data=collections_data)
+                            collections_data=collections_data,
+                            version=VERSION_APP,
+                            creador=CREATOR_APP)
     except Exception as e:
         return render_template('gestion/index.html',
-                            error_message=f'Error al conectar con MongoDB: {str(e)}')
+                            error_message=f'Error al conectar con MongoDB: {str(e)}',
+                            version=VERSION_APP,
+                            creador=CREATOR_APP)
+
+@app.route('/logout')
+def logout():
+    # Limpiar todas las variables de sesión
+    session.clear()
+    # Redirigir al index principal
+    return redirect(url_for('index'))
 
 @app.route('/listar-usuarios')
 def listar_usuarios():
