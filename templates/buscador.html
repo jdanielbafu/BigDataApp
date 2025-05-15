@@ -11,14 +11,14 @@
     <header class="header">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
-                <h2 class="h3 mb-0">Buscador en elastic </b></h2>
+                <h2 class="h3 mb-0">Buscador en elastic</h2>
                 <nav>
                     <ul class="nav">
                         <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
-                        <li class="nav-item"><a class="nav-link" active href="/buscador"><b>Buscador</b></a></li>
+                        <li class="nav-item"><a class="nav-link active" href="/buscador"><b>Buscador</b></a></li>
                         <li class="nav-item"><a class="nav-link" href="/about">Acerca de</a></li>
                         <li class="nav-item"><a class="nav-link" href="/login">Ingresar</a></li>
-                        <li class="nav-item"><a class="nav-link " href="/contacto"><b>Contacto</b></a></li>
+                        <li class="nav-item"><a class="nav-link" href="/contacto"><b>Contacto</b></a></li>
                     </ul>
                 </nav>
             </div>
@@ -33,7 +33,7 @@
                         <h3 class="card-title">Buscador</h3>
                     </div>
                     <div class="card-body">
-                        <form id="searchForm" method="POST" action="{{ url_for('buscar') }}">
+                        <form id="searchForm" method="POST" action="{{ url_for('buscador') }}">
                             <!-- Primera fila -->
                             <div class="row mb-3">
                                 <div class="col-md-4">
