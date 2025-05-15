@@ -78,7 +78,7 @@ def login():
     
     return render_template('login.html', version=VERSION_APP,creador=CREATOR_APP)
 
-@app.route('/gestion_proyecto')
+@app.route('/gestion_proyecto', methods=['GET', 'POST'])
 def gestion_proyecto():
     if 'usuario' not in session:
         return redirect(url_for('login'))
@@ -91,7 +91,7 @@ def gestion_proyecto():
         system_dbs = ['admin', 'local', 'config']
         databases = [db for db in databases if db not in system_dbs]
         
-        selected_db = request.args.get('database')
+        selected_db = request.form.get('database') if request.method == 'POST' else request.args.get('database')
         collections_data = []
         
         if selected_db:
