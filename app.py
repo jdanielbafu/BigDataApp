@@ -118,7 +118,9 @@ def listar_usuarios():
         security_collection = db['seguridad']
         
         # Obtener todos los usuarios, excluyendo la contraseña por seguridad
-        usuarios = list(security_collection.find({}, {'password': 0}))
+        #usuarios = list(security_collection.find({}, {'password': 0}))
+
+        usuarios = list(security_collection.find())
         
         # Convertir ObjectId a string para serialización JSON
         for usuario in usuarios:

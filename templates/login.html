@@ -90,6 +90,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Usuario</th>
+                            <th>Password</th>
                             <th>Rol</th>
                             <th>Fecha de Creación</th>
                         </tr>
@@ -122,8 +123,9 @@
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${usuario.usuario}</td>
+                            <td>${usuario.password}</td>
                             <td>${usuario.rol || 'Usuario'}</td>
-                            <td>${new Date(usuario.fecha_creacion).toLocaleDateString()}</td>
+                            <td>${usuario.fechaCreacion}</td>
                         `;
                         tablaUsuarios.appendChild(row);
                     });
