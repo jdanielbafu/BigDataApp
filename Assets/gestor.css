@@ -1,130 +1,23 @@
-/* Estilos para las páginas de gestión */
+
 body {
-    background: linear-gradient(to right, #2C3E50, #d57541);
+    background: linear-gradient(to right, #c95000, #fff200);
     min-height: 100vh;
     margin: 0;
     padding: 0;
 }
-
 .header {
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(138, 193, 242, 0.9);
     padding: 1rem 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 .container {
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(130, 180, 201, 0.9);
     padding: 2rem;
-    border-radius: 8px;
+    border-radius: 10px;
     margin-top: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
 footer {
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(80, 129, 242, 0.9);
     padding: 1rem 0;
     margin-top: 2rem;
-    color: #2C3E50;
-    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    color: #666;
 }
-
-/* Estilos para formularios */
-.form-control:focus {
-    border-color: #3498DB;
-    box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
-}
-
-.form-select:focus {
-    border-color: #3498DB;
-    box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
-}
-
-/* Estilos para tablas */
-.table {
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.table thead {
-    background-color: #2C3E50;
-    color: white;
-}
-
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(52, 152, 219, 0.1);
-}
-
-/* Estilos para botones */
-.btn-primary {
-    background-color: #3498DB;
-    border-color: #3498DB;
-}
-
-.btn-primary:hover {
-    background-color: #2980B9;
-    border-color: #2980B9;
-}
-
-.btn-info {
-    background-color: #2C3E50;
-    border-color: #2C3E50;
-    color: white;
-}
-
-.btn-info:hover {
-    background-color: #1A252F;
-    border-color: #1A252F;
-    color: white;
-}
-
-/* Estilos para enlaces de navegación */
-.nav-link {
-    color: #2C3E50;
-    transition: color 0.3s ease;
-}
-
-.nav-link:hover {
-    color: #3498DB;
-}
-
-.nav-link.active {
-    color: #3498DB;
-    font-weight: bold;
-}
-
-/* Estilos para alertas */
-.alert {
-    border-radius: 8px;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.alert-danger {
-    background-color: #E74C3C;
-    color: white;
-}
-
-.alert-warning {
-    background-color: #F1C40F;
-    color: #2C3E50;
-}
-
-/* Estilos para títulos */
-h1, h2, h3 {
-    color: #2C3E50;
-}
-
-/* Estilos para el selector de base de datos */
-.form-label {
-    color: #2C3E50;
-    font-weight: 500;
-}
-
-/* Estilos para el contenedor de acciones */
-.actions-container {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-start;
-    align-items: center;
-} 
