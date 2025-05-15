@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import os
@@ -100,12 +100,36 @@ def gestion_mongodb():
                 })
         
         return render_template('gestionMongoDb.html',
-                             databases=databases,
-                             selected_db=selected_db,
-                             collections_data=collections_data)
+                            databases=databases,
+                            selected_db=selected_db,
+                            collections_data=collections_data)
     except Exception as e:
         return render_template('gestionMongoDb.html',
-                             error_message=f'Error al conectar con MongoDB: {str(e)}')
+                            error_message=f'Error al conectar con MongoDB: {str(e)}')
+
+@app.route('/listar-usuarios')
+def listar_usuarios():
+    try:
+        client = connect_mongo()
+        if not client:
+            return jsonify({'error': 'Error de conexión con la base de datos'}), 500
+        
+        db = client['administracion']
+        security_collection = db['seguridad']
+        
+        # Obtener todos los usuarios, excluyendo la contraseña por seguridad
+        usuarios = list(security_collection.find({}, {'password': 0}))
+        
+        # Convertir ObjectId a string para serialización JSON
+        for usuario in usuarios:
+            usuario['_id'] = str(usuario['_id'])
+        
+        return jsonify(usuarios)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if 'client' in locals():
+            client.close()
 
 if __name__ == '__main__':
     app.run(debug=True)
