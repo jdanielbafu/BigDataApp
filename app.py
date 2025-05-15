@@ -6,6 +6,12 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
+
+# Versión de la aplicación
+VERSION_APP = "Versión 1.1 del Mayo 15 del 2025"
+#
+CREATOR_APP = "Nombre del creador/ruta github"
+
 mongo_uri = os.environ.get("MONGO_URI")
 
 if not mongo_uri:
@@ -26,18 +32,17 @@ def connect_mongo():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
-
+    return render_template('index.html', version=VERSION_APP,creador=CREATOR_APP)
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    return render_template('about.html', version=VERSION_APP,creador=CREATOR_APP)
 
 @app.route('/contacto', methods=['GET', 'POST'])
 def contacto():
     if request.method == 'POST':
         # Aquí puedes agregar la lógica para procesar el formulario de contacto
         return redirect(url_for('contacto'))
-    return render_template('contacto.html')
+    return render_template('contacto.html', version=VERSION_APP,creador=CREATOR_APP)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -45,7 +50,7 @@ def login():
         # Primero verificar la conectividad con MongoDB
         client = connect_mongo()
         if not client:
-            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.')
+            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.', version=VERSION_APP,creador=CREATOR_APP)
         
         try:
             db = client['administracion']
@@ -63,13 +68,13 @@ def login():
                 session['usuario'] = usuario
                 return redirect(url_for('gestion_mongodb'))
             else:
-                return render_template('login.html', error_message='Usuario o contraseña incorrectos')
+                return render_template('login.html', error_message='Usuario o contraseña incorrectos', version=VERSION_APP,creador=CREATOR_APP)
         except Exception as e:
-            return render_template('login.html', error_message=f'Error al validar credenciales: {str(e)}')
+            return render_template('login.html', error_message=f'Error al validar credenciales: {str(e)}', version=VERSION_APP,creador=CREATOR_APP)
         finally:
             client.close()
     
-    return render_template('login.html')
+    return render_template('login.html', version=VERSION_APP,creador=CREATOR_APP)
 
 @app.route('/gestion-mongodb')
 def gestion_mongodb():
@@ -99,12 +104,12 @@ def gestion_mongodb():
                     'count': count
                 })
         
-        return render_template('gestionMongoDb.html',
+        return render_template('gestion/index.html',
                             databases=databases,
                             selected_db=selected_db,
                             collections_data=collections_data)
     except Exception as e:
-        return render_template('gestionMongoDb.html',
+        return render_template('gestion/index.html',
                             error_message=f'Error al conectar con MongoDB: {str(e)}')
 
 @app.route('/listar-usuarios')

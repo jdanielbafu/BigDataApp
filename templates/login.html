@@ -47,6 +47,7 @@
                     <ul class="nav">
                         <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link" href="/about">Acerca de</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/elastic">Buscador</a></li>
                         <li class="nav-item"><a class="nav-link active" href="/login"><b>Ingresar</b></a></li>
                         <li class="nav-item"><a class="nav-link" href="/contacto">Contacto</a></li>
                     </ul>
@@ -82,7 +83,6 @@
                 </div>
             </form>
         </div>
-
         <div id="ListadoUsuarios" class="mt-4" style="display: none;">
             <h3 class="text-center mb-3">Listado de Usuarios</h3>
             <div class="table-responsive">
@@ -100,11 +100,19 @@
                 </table>
             </div>
         </div>
+
+        <div id="div_cargando" class="text-center mt-4" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2">Cargando usuarios...</p>
+        </div>
     </div>
 
     <footer class="text-center">
-        <p class="mb-0">Creado por XYZ</p>
+        <p class="mb-0">Creado por {{ creador }}</p>
         <p class="mb-0" id="current-year"></p>
+        <p class="mb-0" id="version_app">{{ version }}</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq4cvVmFh9vju3MXgpoK" crossorigin="anonymous"></script>
@@ -112,6 +120,9 @@
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
         function listarUsuarios() {
+            // Mostrar el indicador de carga
+            document.getElementById('div_cargando').style.display = 'block';
+            
             fetch('/listar-usuarios')
                 .then(response => response.json())
                 .then(data => {
@@ -130,11 +141,15 @@
                         tablaUsuarios.appendChild(row);
                     });
                     
+                    // Ocultar el indicador de carga antes de mostrar la tabla
+                    document.getElementById('div_cargando').style.display = 'none';
                     contenedor.style.display = 'block';
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Error al obtener la lista de usuarios');
+                    // Ocultar el indicador de carga en caso de error
+                    document.getElementById('div_cargando').style.display = 'none';
                 });
         }
     </script>
