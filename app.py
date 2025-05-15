@@ -5,6 +5,7 @@ import zipfile
 import os
 from datetime import datetime
 import json
+import re
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
@@ -239,6 +240,136 @@ def crear_coleccion():
                             usuario=session['usuario'],
                             version=VERSION_APP,
                             creador=CREATOR_APP)
+    finally:
+        if 'client' in locals():
+            client.close()
+
+@app.route('/ver-registros/<database>/<collection>')
+def ver_registros(database, collection):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    try:
+        client = connect_mongo()
+        if not client:
+            return render_template('gestion/index.html',
+                                error_message='Error de conexión con MongoDB',
+                                version=VERSION_APP,
+                                creador=CREATOR_APP,
+                                usuario=session['usuario'])
+        
+        db = client[database]
+        collection_obj = db[collection]
+        
+        # Obtener los primeros 100 registros por defecto
+        records = list(collection_obj.find().limit(100))
+        
+        # Convertir ObjectId a string para serialización JSON
+        for record in records:
+            record['_id'] = str(record['_id'])
+        
+        return render_template('gestion/ver_registros.html',
+                            database=database,
+                            collection_name=collection,
+                            records=records,
+                            version=VERSION_APP,
+                            creador=CREATOR_APP,
+                            usuario=session['usuario'])
+    except Exception as e:
+        return render_template('gestion/index.html',
+                            error_message=f'Error al obtener registros: {str(e)}',
+                            version=VERSION_APP,
+                            creador=CREATOR_APP,
+                            usuario=session['usuario'])
+    finally:
+        if 'client' in locals():
+            client.close()
+
+@app.route('/obtener-registros', methods=['POST'])
+def obtener_registros():
+    if 'usuario' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    
+    try:
+        database = request.form.get('database')
+        collection = request.form.get('collection')
+        limit = int(request.form.get('limit', 100))
+        
+        client = connect_mongo()
+        if not client:
+            return jsonify({'error': 'Error de conexión con MongoDB'}), 500
+        
+        db = client[database]
+        collection_obj = db[collection]
+        
+        # Obtener los registros con el límite especificado
+        records = list(collection_obj.find().limit(limit))
+        
+        # Convertir ObjectId a string para serialización JSON
+        for record in records:
+            record['_id'] = str(record['_id'])
+        
+        return jsonify({'records': records})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if 'client' in locals():
+            client.close()
+
+@app.route('/crear-base-datos-form')
+def crear_base_datos_form():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    return render_template('gestion/crear_base_datos.html',
+                         version=VERSION_APP,
+                         creador=CREATOR_APP,
+                         usuario=session['usuario'])
+
+@app.route('/crear-base-datos', methods=['POST'])
+def crear_base_datos():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    try:
+        database_name = request.form.get('database_name')
+        collection_name = request.form.get('collection_name')
+        
+        # Validar que los nombres no contengan caracteres especiales
+        valid_pattern = re.compile(r'^[a-zA-Z0-9_]+$')
+        if not valid_pattern.match(database_name) or not valid_pattern.match(collection_name):
+            return render_template('gestion/crear_base_datos.html',
+                                error_message='Los nombres no pueden contener tildes, espacios ni caracteres especiales',
+                                version=VERSION_APP,
+                                creador=CREATOR_APP,
+                                usuario=session['usuario'])
+        
+        # Conectar a MongoDB
+        client = connect_mongo()
+        if not client:
+            return render_template('gestion/crear_base_datos.html',
+                                error_message='Error de conexión con MongoDB',
+                                version=VERSION_APP,
+                                creador=CREATOR_APP,
+                                usuario=session['usuario'])
+        
+        # Crear la base de datos y la colección
+        db = client[database_name]
+        collection = db[collection_name]
+        
+        # Insertar un documento vacío para crear la colección
+        collection.insert_one({})
+        
+        # Eliminar el documento vacío
+        collection.delete_one({})
+        
+        return redirect(url_for('gestion_proyecto', database=database_name))
+        
+    except Exception as e:
+        return render_template('gestion/crear_base_datos.html',
+                            error_message=f'Error al crear la base de datos: {str(e)}',
+                            version=VERSION_APP,
+                            creador=CREATOR_APP,
+                            usuario=session['usuario'])
     finally:
         if 'client' in locals():
             client.close()

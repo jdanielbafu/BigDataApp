@@ -43,10 +43,8 @@
                 </select>
             </div>
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Mostrar Colecciones</button>
-                {% if selected_db %}
-                <a href="{{ url_for('crear_coleccion_form', database=selected_db) }}" class="btn btn-success">Crear una colección</a>
-                {% endif %}
+                <button type="submit" class="btn btn-success">Mostrar Colecciones</button>
+                <a href="{{ url_for('crear_base_datos_form') }}" class="btn btn-primary">Crear base de datos</a>
             </div>
         </form>
 
@@ -54,7 +52,7 @@
         <h2>Colecciones en la base de datos: {{ selected_db }}</h2>
         {% if collections_data %}
             <div id="div_colecciones">
-                <button type="button" class="btn btn-success">Crear una colección</button>
+                <a href="{{ url_for('crear_coleccion_form', database=selected_db) }}" class="btn btn-success">Crear una colección</a>
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -70,7 +68,9 @@
                             <td>{{ collection.index }}</td>
                             <td>{{ collection.name }}</td>
                             <td>{{ collection.count }}</td>
-                            <td><button class="btn btn-info btn-sm">Ver Registros</button></td>
+                            <td>
+                                <a href="{{ url_for('ver_registros', database=selected_db, collection=collection.name) }}" class="btn btn-info btn-sm">Ver Registros</a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
