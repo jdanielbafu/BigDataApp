@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
 
 # Versión de la aplicación
-VERSION_APP = "Versión 1.2 del Mayo 15 del 2025"
+VERSION_APP = "Versión 1.3 del Mayo 15 del 2025"
 #
 CREATOR_APP = "Nombre del creador/ruta github"
 
