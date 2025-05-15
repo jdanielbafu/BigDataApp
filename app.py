@@ -42,23 +42,32 @@ def contacto():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        # Primero verificar la conectividad con MongoDB
         client = connect_mongo()
-        db = client['administracion']
-        security_collection = db['seguridad']
-        usuario = request.form['usuario']
-        password = request.form['password']
+        if not client:
+            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.')
         
-        # Verificar credenciales en MongoDB
-        user = security_collection.find_one({
-            'usuario': usuario,
-            'password': password
-        })
-        
-        if user:
-            session['usuario'] = usuario
-            return redirect(url_for('gestion_mongodb'))
-        else:
-            return render_template('login.html', error_message='Usuario o contraseña incorrectos')
+        try:
+            db = client['administracion']
+            security_collection = db['seguridad']
+            usuario = request.form['usuario']
+            password = request.form['password']
+            
+            # Verificar credenciales en MongoDB
+            user = security_collection.find_one({
+                'usuario': usuario,
+                'password': password
+            })
+            
+            if user:
+                session['usuario'] = usuario
+                return redirect(url_for('gestion_mongodb'))
+            else:
+                return render_template('login.html', error_message='Usuario o contraseña incorrectos')
+        except Exception as e:
+            return render_template('login.html', error_message=f'Error al validar credenciales: {str(e)}')
+        finally:
+            client.close()
     
     return render_template('login.html')
 
