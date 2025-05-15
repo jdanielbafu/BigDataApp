@@ -14,16 +14,17 @@
                 <h1 class="h3 mb-0">Gestión del proyecto MiProyecto</h1>
                 <nav>
                     <ul class="nav">
-                        <li class="nav-item"><a class="nav-link" href="/mongoAdmin">Gestionar Mongo Db</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/gestion_proyecto" active><b>Gestionar Mongo Db</b></a></li>
                         <li class="nav-item"><a class="nav-link" href="/elasticAdmin">Gestionar Elastic</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/">Salir</a></li>
                     </ul>
                 </nav>
             </div>
         </div>
     </header>
+    <hr>
     <div class="container mt-2">
-        <h1>Explorador de MongoDB</h1>
+        <h4>Explorador de MongoDB</h4>
 
         {% if error_message %}
         <div class="alert alert-danger" role="alert">

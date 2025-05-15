@@ -66,7 +66,7 @@ def login():
             
             if user:
                 session['usuario'] = usuario
-                return redirect(url_for('gestion_mongodb'))
+                return redirect(url_for('gestion_proyecto'))
             else:
                 return render_template('login.html', error_message='Usuario o contraseña incorrectos', version=VERSION_APP,creador=CREATOR_APP)
         except Exception as e:
@@ -77,7 +77,7 @@ def login():
     return render_template('login.html', version=VERSION_APP,creador=CREATOR_APP)
 
 @app.route('/gestion-mongodb')
-def gestion_mongodb():
+def gestion_proyecto():
     if 'usuario' not in session:
         return redirect(url_for('login'))
     
