@@ -47,6 +47,26 @@ def contacto():
         return redirect(url_for('contacto'))
     return render_template('contacto.html', version=VERSION_APP,creador=CREATOR_APP)
 
+@app.route('/buscador', methods=['GET', 'POST'])
+def buscador():
+    
+    if request.method == 'POST':
+        # Aquí irá la lógica de búsqueda
+        search_type = request.form.get('search_type')
+        fecha_desde = request.form.get('fecha_desde')
+        fecha_hasta = request.form.get('fecha_hasta')
+        search_text = request.form.get('search_text')
+        
+        # TODO: Implementar la lógica de búsqueda
+        return render_template('buscador.html',
+                            version=VERSION_APP,
+                            creador=CREATOR_APP)
+    
+    return render_template('buscador.html',
+                        version=VERSION_APP,
+                        creador=CREATOR_APP)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -120,13 +140,6 @@ def gestion_proyecto():
                             version=VERSION_APP,
                             creador=CREATOR_APP,
                             usuario=session['usuario'])
-
-@app.route('/logout')
-def logout():
-    # Limpiar todas las variables de sesión
-    session.clear()
-    # Redirigir al index principal
-    return redirect(url_for('index'))
 
 @app.route('/listar-usuarios')
 def listar_usuarios():
@@ -374,28 +387,14 @@ def crear_base_datos():
         if 'client' in locals():
             client.close()
 
-@app.route('/buscador', methods=['GET', 'POST'])
-def buscador():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    
-    if request.method == 'POST':
-        # Aquí irá la lógica de búsqueda
-        search_type = request.form.get('search_type')
-        fecha_desde = request.form.get('fecha_desde')
-        fecha_hasta = request.form.get('fecha_hasta')
-        search_text = request.form.get('search_text')
-        
-        # TODO: Implementar la lógica de búsqueda
-        return render_template('buscador.html',
-                            version=VERSION_APP,
-                            creador=CREATOR_APP,
-                            usuario=session['usuario'])
-    
-    return render_template('buscador.html',
-                         version=VERSION_APP,
-                         creador=CREATOR_APP,
-                         usuario=session['usuario'])
+
+@app.route('/logout')
+def logout():
+    # Limpiar todas las variables de sesión
+    session.clear()
+    # Redirigir al index principal
+    return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
