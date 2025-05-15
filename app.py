@@ -43,7 +43,7 @@ def about():
 @app.route('/contacto', methods=['GET', 'POST'])
 def contacto():
     if request.method == 'POST':
-        # Aquí puedes agregar la lógica para procesar el formulario de contacto
+        # Aquí va la lógica para procesar el formulario de contacto
         return redirect(url_for('contacto'))
     return render_template('contacto.html', version=VERSION_APP,creador=CREATOR_APP)
 
@@ -58,13 +58,9 @@ def buscador():
         search_text = request.form.get('search_text')
         
         # TODO: Implementar la lógica de búsqueda
-        return render_template('buscador.html',
-                            version=VERSION_APP,
-                            creador=CREATOR_APP)
+        return render_template('buscador.html',version=VERSION_APP,creador=CREATOR_APP)
     
-    return render_template('buscador.html',
-                        version=VERSION_APP,
-                        creador=CREATOR_APP)
+    return render_template('buscador.html',version=VERSION_APP,creador=CREATOR_APP)
 
 
 @app.route('/login', methods=['GET', 'POST'])
