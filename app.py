@@ -58,7 +58,7 @@ def login():
         # Primero verificar la conectividad con MongoDB
         client = connect_mongo()
         if not client:
-            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.', version=VERSION_APP,creador=CREATOR_APP)
+            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.', version=VERSION_APP,creador=CREADOR_APP)
         
         try:
             db = client['administracion']
@@ -76,13 +76,13 @@ def login():
                 session['usuario'] = usuario
                 return redirect(url_for('gestion_proyecto'))
             else:
-                return render_template('login.html', error_message='Usuario o contraseña incorrectos', version=VERSION_APP,creador=CREATOR_APP)
+                return render_template('login.html', error_message='Usuario o contraseña incorrectos', version=VERSION_APP,creador=CREADOR_APP)
         except Exception as e:
-            return render_template('login.html', error_message=f'Error al validar credenciales: {str(e)}', version=VERSION_APP,creador=CREATOR_APP)
+            return render_template('login.html', error_message=f'Error al validar credenciales: {str(e)}', version=VERSION_APP,creador=CREADOR_APP)
         finally:
             client.close()
     
-    return render_template('login.html', version=VERSION_APP,creador=CREATOR_APP)
+    return render_template('login.html', version=VERSION_APP,creador=CREADOR_APP)
 
 @app.route('/gestion_proyecto', methods=['GET', 'POST'])
 def gestion_proyecto():
