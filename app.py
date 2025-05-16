@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import os
+import json
 from datetime import datetime
 
 app = Flask(__name__)
@@ -82,6 +83,32 @@ def login():
             client.close()
     
     return render_template('login.html')
+
+@app.route('/listar-usuarios')
+def listar_usuarios():
+    
+    try:
+        client = connect_mongo()
+        if not client:
+            return jsonify({'error': 'Error de conexión con la base de datos. Por favor, intente más tarde.'})
+        # Obtener la colección de seguridad 
+
+        db = client['administracion']
+        security_collection = db['seguridad']
+        
+        # Obtener lista de usuarios
+        usuarios = list(security_collection.find())
+        for usuario in usuarios:
+            # Convertir ObjectId a string
+            usuario['_id'] = str(usuario['_id'])
+        
+        return jsonify(usuarios)
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener usuarios: {str(e)}'})
+    finally:
+        if 'client' in locals():
+            client.close()
+
 
 @app.route('/gestion-mongodb')
 def gestion_mongodb():
