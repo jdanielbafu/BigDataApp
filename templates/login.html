@@ -35,7 +35,7 @@
             </div>
             {% endif %}
             
-            <form method="POST" action="/login">
+            <form method="POST" action="/login" onsubmit="mostrarCargando()">
                 <div class="mb-3">
                     <label for="usuario" class="form-label">Usuario</label>
                     <input type="text" class="form-control" id="usuario" name="usuario" required>

@@ -74,7 +74,7 @@ def login():
             
             if user:
                 session['usuario'] = usuario
-                return redirect(url_for('gestion_mongodb'))
+                return redirect(url_for('gestion_proyecto'))
             else:
                 return render_template('login.html',version=VERSION_APP, creador=CREADOR_APP, error_message='Usuario o contraseña incorrectos')
         except Exception as e:
@@ -110,8 +110,8 @@ def listar_usuarios():
             client.close()
 
 
-@app.route('/gestion-mongodb')
-def gestion_mongodb():
+@app.route('/gestion_proyecto',methods=['GET', 'POST'])
+def gestion_proyecto():
     if 'usuario' not in session:
         return redirect(url_for('login'))
     
@@ -138,13 +138,17 @@ def gestion_mongodb():
                     'count': count
                 })
         
-        return render_template('gestionMongoDb.html',
-                             databases=databases,
-                             selected_db=selected_db,
-                             collections_data=collections_data)
+        return render_template('gestor/index.html',
+                            databases=databases,
+                            selected_db=selected_db,
+                            collections_data=collections_data,
+                            version=VERSION_APP,
+                            usuario=session['usuario'])
     except Exception as e:
-        return render_template('gestionMongoDb.html',
-                             error_message=f'Error al conectar con MongoDB: {str(e)}')
+        return render_template('gestor/index.html',
+                            error_message=f'Error al conectar con MongoDB: {str(e)}',
+                            version=VERSION_APP,
+                            usuario=session['usuario'])
 
 if __name__ == '__main__':
     app.run(debug=True)
