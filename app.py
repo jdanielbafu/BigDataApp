@@ -138,7 +138,7 @@ def gestion_proyecto():
                     'count': count
                 })
         
-        return render_template('gestion/index.html',
+        return render_template('gestion/Index.html',
                             databases=databases,
                             selected_db=selected_db,
                             collections_data=collections_data,
@@ -146,11 +146,13 @@ def gestion_proyecto():
                             creador=CREADOR_APP,
                             usuario=session['usuario'])
     except Exception as e:
-        return render_template('gestion/index.html',
+        return render_template('gestion/Index.html',
                             error_message=f'Error al conectar con MongoDB: {str(e)}',
                             version=VERSION_APP,
                             creador=CREADOR_APP,
                             usuario=session['usuario'])
+    
+
 
 if __name__ == '__main__':
     app.run(debug=True)
