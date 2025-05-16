@@ -123,7 +123,7 @@ def gestion_proyecto():
         system_dbs = ['admin', 'local', 'config']
         databases = [db for db in databases if db not in system_dbs]
         
-        selected_db = request.args.get('database')
+        selected_db = request.form.get('database') if request.method == 'POST' else request.args.get('database')
         collections_data = []
         
         if selected_db:
@@ -138,16 +138,18 @@ def gestion_proyecto():
                     'count': count
                 })
         
-        return render_template('gestor/Index.html',
+        return render_template('gestion/index.html',
                             databases=databases,
                             selected_db=selected_db,
                             collections_data=collections_data,
                             version=VERSION_APP,
+                            creador=CREADOR_APP,
                             usuario=session['usuario'])
     except Exception as e:
-        return render_template('gestor/index.html',
+        return render_template('gestion/index.html',
                             error_message=f'Error al conectar con MongoDB: {str(e)}',
                             version=VERSION_APP,
+                            creador=CREADOR_APP,
                             usuario=session['usuario'])
 
 if __name__ == '__main__':
