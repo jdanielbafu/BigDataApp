@@ -138,7 +138,7 @@ def gestion_proyecto():
                     'count': count
                 })
         
-        return render_template('templates\gestor\Index.html',
+        return render_template('gestor/Index.html',
                             databases=databases,
                             selected_db=selected_db,
                             collections_data=collections_data,
