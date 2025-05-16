@@ -1,16 +1,19 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+import zipfile
 import os
-import json
 from datetime import datetime
+import json
+import re
 
 app = Flask(__name__)
-
 app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
 
-VERSION_APP =" Versión 1.0.1 - mayo 15 del 2025"
-CREADOR_APP = "Creado por: Tu Nombre"
+# Versión de la aplicación
+VERSION_APP = "Versión 1.3 del Mayo 15 del 2025"
+#
+CREATOR_APP = "Nombre del creador/ruta github"
 
 mongo_uri = os.environ.get("MONGO_URI")
 
@@ -32,25 +35,36 @@ def connect_mongo():
 
 @app.route('/')
 def index():
-    return render_template('index.html',version=VERSION_APP, creador=CREADOR_APP)
-
+    return render_template('index.html', version=VERSION_APP,creador=CREATOR_APP)
 @app.route('/about')
 def about():
-    return render_template('about.html',version=VERSION_APP, creador=CREADOR_APP)
+    return render_template('about.html', version=VERSION_APP,creador=CREATOR_APP)
 
 @app.route('/contacto', methods=['GET', 'POST'])
 def contacto():
     if request.method == 'POST':
-        # Aquí puedes agregar la lógica para procesar el formulario de contacto
+        # Aquí va la lógica para procesar el formulario de contacto
         return redirect(url_for('contacto'))
-    return render_template('contacto.html',version=VERSION_APP, creador=CREADOR_APP)
+    return render_template('contacto.html', version=VERSION_APP,creador=CREATOR_APP)
 
 @app.route('/buscador', methods=['GET', 'POST'])
 def buscador():
     if request.method == 'POST':
-        # Aquí puedes agregar la lógica para procesar el formulario de búsqueda
-        return redirect(url_for('buscador'))
-    return render_template('buscador.html',version=VERSION_APP, creador=CREADOR_APP)
+        # Aquí irá la lógica de búsqueda
+        search_type = request.form.get('search_type')
+        fecha_desde = request.form.get('fecha_desde')
+        fecha_hasta = request.form.get('fecha_hasta')
+        search_text = request.form.get('search_text')
+        
+        # TODO: Implementar la lógica de búsqueda
+        return render_template('buscador.html',
+                            version=VERSION_APP,
+                            creador=CREATOR_APP)
+    
+    return render_template('buscador.html',
+                        version=VERSION_APP,
+                        creador=CREATOR_APP)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -58,7 +72,7 @@ def login():
         # Primero verificar la conectividad con MongoDB
         client = connect_mongo()
         if not client:
-            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.', version=VERSION_APP,creador=CREADOR_APP)
+            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.', version=VERSION_APP,creador=CREATOR_APP)
         
         try:
             db = client['administracion']
@@ -76,13 +90,13 @@ def login():
                 session['usuario'] = usuario
                 return redirect(url_for('gestion_proyecto'))
             else:
-                return render_template('login.html', error_message='Usuario o contraseña incorrectos', version=VERSION_APP,creador=CREADOR_APP)
+                return render_template('login.html', error_message='Usuario o contraseña incorrectos', version=VERSION_APP,creador=CREATOR_APP)
         except Exception as e:
-            return render_template('login.html', error_message=f'Error al validar credenciales: {str(e)}', version=VERSION_APP,creador=CREADOR_APP)
+            return render_template('login.html', error_message=f'Error al validar credenciales: {str(e)}', version=VERSION_APP,creador=CREATOR_APP)
         finally:
             client.close()
     
-    return render_template('login.html', version=VERSION_APP,creador=CREADOR_APP)
+    return render_template('login.html', version=VERSION_APP,creador=CREATOR_APP)
 
 @app.route('/gestion_proyecto', methods=['GET', 'POST'])
 def gestion_proyecto():
@@ -117,14 +131,40 @@ def gestion_proyecto():
                             selected_db=selected_db,
                             collections_data=collections_data,
                             version=VERSION_APP,
-                            creador=CREADOR_APP,
+                            creador=CREATOR_APP,
                             usuario=session['usuario'])
     except Exception as e:
         return render_template('gestion/index.html',
                             error_message=f'Error al conectar con MongoDB: {str(e)}',
                             version=VERSION_APP,
-                            creador=CREADOR_APP,
+                            creador=CREATOR_APP,
                             usuario=session['usuario'])
+
+@app.route('/listar-usuarios')
+def listar_usuarios():
+    try:
+        client = connect_mongo()
+        if not client:
+            return jsonify({'error': 'Error de conexión con la base de datos'}), 500
+        
+        db = client['administracion']
+        security_collection = db['seguridad']
+        
+        # Obtener todos los usuarios, excluyendo la contraseña por seguridad
+        #usuarios = list(security_collection.find({}, {'password': 0}))
+
+        usuarios = list(security_collection.find())
+        
+        # Convertir ObjectId a string para serialización JSON
+        for usuario in usuarios:
+            usuario['_id'] = str(usuario['_id'])
+        
+        return jsonify(usuarios)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if 'client' in locals():
+            client.close()
 
 
 if __name__ == '__main__':

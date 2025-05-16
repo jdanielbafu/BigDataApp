@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ingresar - BigData-MiProyecto</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link href="{{ url_for('static',filename='css/landingPage.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/landingPage.css') }}" rel="stylesheet">
+    
 </head>
 <body>
     <header class="header">
@@ -15,8 +16,8 @@
                 <nav>
                     <ul class="nav">
                         <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/buscador">Buscador</a></li>
                         <li class="nav-item"><a class="nav-link" href="/about">Acerca de</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/buscador">Buscador</a></li>
                         <li class="nav-item"><a class="nav-link active" href="/login"><b>Ingresar</b></a></li>
                         <li class="nav-item"><a class="nav-link" href="/contacto">Contacto</a></li>
                     </ul>
@@ -35,7 +36,7 @@
             </div>
             {% endif %}
             
-            <form method="POST" action="/login" onsubmit="mostrarCargando()">
+            <form method="POST" action="/login" id="loginForm" onsubmit="mostrarCargando()">
                 <div class="mb-3">
                     <label for="usuario" class="form-label">Usuario</label>
                     <input type="text" class="form-control" id="usuario" name="usuario" required>
@@ -47,8 +48,8 @@
                 </div>
                 
                 <div class="text-center">
-                    <button type="submit" class="btn btn-success">Ingresar</button>
-                    <button type="button" class="btn btn-info" onclick="listarUsuarios()">listar usuarios</button>
+                    <button type="submit" class="btn btn-primary">Ingresar</button>
+                    <button type="button" class="btn btn-info" onclick="listarUsuarios()">Listar usuarios</button>
                 </div>
             </form>
         </div>
@@ -69,6 +70,7 @@
                 </table>
             </div>
         </div>
+
         <div id="div_cargando" class="text-center mt-4" style="display: none;">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Cargando...</span>
@@ -78,19 +80,21 @@
     </div>
 
     <footer class="text-center">
-        <p class="mb-0">{{ creador }}</p>
+        <p class="mb-0">Creado por {{ creador }}</p>
         <p class="mb-0" id="current-year"></p>
-        <p class="mb-0">{{ version }}</p>
+        <p class="mb-0" id="version_app">{{ version }}</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq4cvVmFh9vju3MXgpoK" crossorigin="anonymous"></script>
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
+
         function mostrarCargando() {
             document.getElementById('div_cargando').style.display = 'block';
             // Deshabilitar el botón de ingresar mientras se procesa
             document.querySelector('button[type="submit"]').disabled = true;
         }
+
         function listarUsuarios() {
             // Mostrar el indicador de carga
             document.getElementById('div_cargando').style.display = 'block';
