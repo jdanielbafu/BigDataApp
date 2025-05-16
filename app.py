@@ -58,7 +58,7 @@ def login():
         # Primero verificar la conectividad con MongoDB
         client = connect_mongo()
         if not client:
-            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.')
+            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.', version=VERSION_APP,creador=CREATOR_APP)
         
         try:
             db = client['administracion']
@@ -76,39 +76,13 @@ def login():
                 session['usuario'] = usuario
                 return redirect(url_for('gestion_proyecto'))
             else:
-                return render_template('login.html',version=VERSION_APP, creador=CREADOR_APP, error_message='Usuario o contraseña incorrectos')
+                return render_template('login.html', error_message='Usuario o contraseña incorrectos', version=VERSION_APP,creador=CREATOR_APP)
         except Exception as e:
-            return render_template('login.html',version=VERSION_APP, creador=CREADOR_APP, error_message=f'Error al validar credenciales: {str(e)}')
+            return render_template('login.html', error_message=f'Error al validar credenciales: {str(e)}', version=VERSION_APP,creador=CREATOR_APP)
         finally:
             client.close()
     
-    return render_template('login.html')
-
-@app.route('/listar-usuarios')
-def listar_usuarios():
-    
-    try:
-        client = connect_mongo()
-        if not client:
-            return jsonify({'error': 'Error de conexión con la base de datos. Por favor, intente más tarde.'})
-        # Obtener la colección de seguridad 
-
-        db = client['administracion']
-        security_collection = db['seguridad']
-        
-        # Obtener lista de usuarios
-        usuarios = list(security_collection.find())
-        for usuario in usuarios:
-            # Convertir ObjectId a string
-            usuario['_id'] = str(usuario['_id'])
-        
-        return jsonify(usuarios)
-    except Exception as e:
-        return jsonify({'error': f'Error al obtener usuarios: {str(e)}'})
-    finally:
-        if 'client' in locals():
-            client.close()
-
+    return render_template('login.html', version=VERSION_APP,creador=CREATOR_APP)
 
 @app.route('/gestion_proyecto', methods=['GET', 'POST'])
 def gestion_proyecto():
@@ -138,7 +112,7 @@ def gestion_proyecto():
                     'count': count
                 })
         
-        return render_template('gestion/Index.html',
+        return render_template('gestion/index.html',
                             databases=databases,
                             selected_db=selected_db,
                             collections_data=collections_data,
@@ -146,12 +120,11 @@ def gestion_proyecto():
                             creador=CREADOR_APP,
                             usuario=session['usuario'])
     except Exception as e:
-        return render_template('gestion/Index.html',
+        return render_template('gestion/index.html',
                             error_message=f'Error al conectar con MongoDB: {str(e)}',
                             version=VERSION_APP,
                             creador=CREADOR_APP,
                             usuario=session['usuario'])
-    
 
 
 if __name__ == '__main__':
