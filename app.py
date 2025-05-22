@@ -54,110 +54,6 @@ def contacto():
         return redirect(url_for('contacto'))
     return render_template('contacto.html', version=VERSION_APP,creador=CREATOR_APP)
 
-@app.route('/buscador', methods=['GET', 'POST'])
-def buscador():
-    if request.method == 'POST':
-        try:
-            # Obtener los parámetros del formulario
-            search_type = request.form.get('search_type')
-            search_text = request.form.get('search_text')
-            fecha_desde = request.form.get('fecha_desde')
-            fecha_hasta = request.form.get('fecha_hasta')
-
-            # Construir la consulta base
-            query = {
-                "query": {
-                    "bool": {
-                        "must": []
-                    }
-                },
-                "aggs": {
-                    "categoria": {
-                        "terms": {
-                            "field": "categoria",
-                            "size": 10,
-                            "order": {"_key": "asc"}
-                        }
-                    },
-                    "clasificacion": {
-                        "terms": {
-                            "field": "clasificacion",
-                            "size": 10,
-                            "order": {"_key": "asc"}
-                        }
-                    },
-                    "Fecha": {
-                        "date_histogram": {
-                            "field": "fecha",
-                            "calendar_interval": "year",
-                            "format": "yyyy"
-                        }
-                    }
-                }
-            }
-
-            # Agregar condición de búsqueda según el tipo
-            if search_type == 'texto':
-                query["query"]["bool"]["must"].extend([
-                    {"match": {"texto": search_text}},
-                    {
-                        "match_phrase": {
-                            "texto": {
-                                "query": search_text,
-                                "slop": 3
-                            }
-                        }
-                    }
-                ])
-            else:
-                query["query"]["bool"]["must"].append(
-                    {"match": {search_type: search_text}}
-                )
-
-            # Agregar rango de fechas si están presentes
-            if fecha_desde or fecha_hasta:
-                range_query = {
-                    "range": {
-                        "prov_f_fecha": {
-                            "format": "yyyy-MM-dd"
-                        }
-                    }
-                }
-                if fecha_desde:
-                    range_query["range"]["prov_f_fecha"]["gte"] = fecha_desde
-                if fecha_hasta:
-                    range_query["range"]["prov_f_fecha"]["lte"] = fecha_hasta
-                query["query"]["bool"]["must"].append(range_query)
-
-            # Ejecutar la búsqueda en Elasticsearch
-            response = client.search(
-                index=INDEX_NAME,
-                body=query
-            )
-
-            # Preparar los resultados para la plantilla
-            hits = response['hits']['hits']
-            aggregations = response['aggregations']
-
-            return render_template('buscador.html',
-                                version=VERSION_APP,
-                                creador=CREATOR_APP,
-                                hits=hits,
-                                aggregations=aggregations,
-                                search_type=search_type,
-                                search_text=search_text,
-                                fecha_desde=fecha_desde,
-                                fecha_hasta=fecha_hasta)
-        
-        except Exception as e:
-            return render_template('buscador.html',
-                                version=VERSION_APP,
-                                creador=CREATOR_APP,
-                                error_message=f'Error en la búsqueda: {str(e)}')
-    
-    return render_template('buscador.html',
-                        version=VERSION_APP,
-                        creador=CREATOR_APP)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -644,6 +540,111 @@ def elastic_eliminar_documento():
             
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/buscador', methods=['GET', 'POST'])
+def buscador():
+    if request.method == 'POST':
+        try:
+            # Obtener los parámetros del formulario
+            search_type = request.form.get('search_type')
+            search_text = request.form.get('search_text')
+            fecha_desde = request.form.get('fecha_desde')
+            fecha_hasta = request.form.get('fecha_hasta')
+
+            # Construir la consulta base
+            query = {
+                "query": {
+                    "bool": {
+                        "must": []
+                    }
+                },
+                "aggs": {
+                    "categoria": {
+                        "terms": {
+                            "field": "categoria",
+                            "size": 10,
+                            "order": {"_key": "asc"}
+                        }
+                    },
+                    "clasificacion": {
+                        "terms": {
+                            "field": "clasificacion",
+                            "size": 10,
+                            "order": {"_key": "asc"}
+                        }
+                    },
+                    "Fecha": {
+                        "date_histogram": {
+                            "field": "fecha",
+                            "calendar_interval": "year",
+                            "format": "yyyy"
+                        }
+                    }
+                }
+            }
+
+            # Agregar condición de búsqueda según el tipo
+            if search_type == 'texto':
+                query["query"]["bool"]["must"].extend([
+                    {"match": {"texto": search_text}},
+                    {
+                        "match_phrase": {
+                            "texto": {
+                                "query": search_text,
+                                "slop": 3
+                            }
+                        }
+                    }
+                ])
+            else:           #si no es una búsqueda por texto
+                query["query"]["bool"]["must"].append(
+                    {"match": {search_type: search_text}}
+                )
+
+            # Agregar rango de fechas si están presentes
+            if fecha_desde or fecha_hasta:
+                range_query = {
+                    "range": {
+                        "fecha": {
+                            "format": "yyyy-MM-dd"
+                        }
+                    }
+                }
+                if fecha_desde:
+                    range_query["range"]["fecha"]["gte"] = fecha_desde
+                if fecha_hasta:
+                    range_query["range"]["fecha"]["lte"] = fecha_hasta
+                query["query"]["bool"]["must"].append(range_query)
+
+            # Ejecutar la búsqueda en Elasticsearch
+            response = client.search(
+                index=INDEX_NAME,
+                body=query
+            )
+
+            # Preparar los resultados para la plantilla
+            hits = response['hits']['hits']
+            aggregations = response['aggregations']
+
+            return render_template('buscador.html',
+                                version=VERSION_APP,
+                                creador=CREATOR_APP,
+                                hits=hits,
+                                aggregations=aggregations,
+                                search_type=search_type,
+                                search_text=search_text,
+                                fecha_desde=fecha_desde,
+                                fecha_hasta=fecha_hasta)
+        
+        except Exception as e:
+            return render_template('buscador.html',
+                                version=VERSION_APP,
+                                creador=CREATOR_APP,
+                                error_message=f'Error en la búsqueda: {str(e)}')
+    
+    return render_template('buscador.html',
+                        version=VERSION_APP,
+                        creador=CREATOR_APP)
 
 @app.route('/api/search', methods=['POST'])
 def search():
