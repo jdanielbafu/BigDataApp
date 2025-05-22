@@ -165,10 +165,10 @@ def crear_coleccion_form(database):
     if 'usuario' not in session:
         return redirect(url_for('login'))
     return render_template('gestion/crear_coleccion.html', 
-                         database=database,
-                         usuario=session['usuario'],
-                         version=VERSION_APP,
-                         creador=CREATOR_APP)
+                        database=database,
+                        usuario=session['usuario'],
+                        version=VERSION_APP,
+                        creador=CREATOR_APP)
 
 @app.route('/crear-coleccion', methods=['POST'])
 def crear_coleccion():
@@ -327,9 +327,9 @@ def crear_base_datos_form():
     if 'usuario' not in session:
         return redirect(url_for('login'))
     return render_template('gestion/crear_base_datos.html',
-                         version=VERSION_APP,
-                         creador=CREATOR_APP,
-                         usuario=session['usuario'])
+                        version=VERSION_APP,
+                        creador=CREATOR_APP,
+                        usuario=session['usuario'])
 
 @app.route('/crear-base-datos', methods=['POST'])
 def crear_base_datos():
@@ -598,12 +598,11 @@ def buscador():
             # Agregar condición de búsqueda según el tipo
             if search_type == 'texto':
                 query["query"]["bool"]["must"].extend([
-                    {"match": {"texto": search_text}},
                     {
                         "match_phrase": {
                             "texto": {
                                 "query": search_text,
-                                "slop": 3
+                                "slop": 1
                             }
                         }
                     }
