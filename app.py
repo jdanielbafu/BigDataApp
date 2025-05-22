@@ -17,13 +17,10 @@ app = Flask(__name__)
 
 # Versión de la aplicación
 VERSION_APP = "Versión 2.1 del Mayo 22 del 2025"
-#
 CREATOR_APP = "Nombre del creador/ruta github"
-
-mongo_uri = os.environ.get("MONGO_URI")
+mongo_uri   = os.environ.get("MONGO_URI")
 
 if not mongo_uri:
-    # Usar la URI directamente (menos seguro, solo para desarrollo local)
     uri = "mongodb+srv://DbCentral:DbCentral2025@cluster0.vhltza7.mongodb.net/?appName=Cluster0"
     mongo_uri = uri
 
@@ -48,6 +45,7 @@ INDEX_NAME = "ucentral_test"
 @app.route('/')
 def index():
     return render_template('index.html', version=VERSION_APP,creador=CREATOR_APP)
+
 @app.route('/about')
 def about():
     return render_template('about.html', version=VERSION_APP,creador=CREATOR_APP)
@@ -170,13 +168,12 @@ def login():
         # Primero verificar la conectividad con MongoDB
         client = connect_mongo()
         if not client:
-            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.', version=VERSION_APP,creador=CREATOR_APP)
-        
+            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.', version=VERSION_APP,creador=CREATOR_APP)        
         try:
-            db = client['administracion']
+            db                  = client['administracion']
             security_collection = db['seguridad']
-            usuario = request.form['usuario']
-            password = request.form['password']
+            usuario             = request.form['usuario']
+            password            = request.form['password']
             
             # Verificar credenciales en MongoDB
             user = security_collection.find_one({
