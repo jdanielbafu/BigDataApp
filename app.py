@@ -609,7 +609,7 @@ def buscador():
                 ])
             else:           #si no es una búsqueda por texto
                 query["query"]["bool"]["must"].append(
-                    {"match": {search_type: search_text}}
+                    {"match": {search_type: "*"+search_text+"*"}}
                 )
 
             # Agregar rango de fechas
