@@ -9,7 +9,7 @@ import re
 from elasticsearch import Elasticsearch
 
 app = Flask(__name__)
-
+app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
 
 # Versión de la aplicación
 VERSION_APP = "Versión 2.1 del Mayo 22 del 2025"
@@ -638,7 +638,8 @@ def buscador():
                                 search_type=search_type,
                                 search_text=search_text,
                                 fecha_desde=fecha_desde,
-                                fecha_hasta=fecha_hasta)
+                                fecha_hasta=fecha_hasta,
+                                query=query)
         
         except Exception as e:
             return render_template('buscador.html',
