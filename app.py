@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 import json
 import re
+from elasticsearch import Elasticsearch
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
@@ -32,6 +33,13 @@ def connect_mongo():
     except Exception as e:
         print(f"Error al conectar a MongoDB: {e}")
         return None
+
+# Configuración de Elasticsearch
+es_client = Elasticsearch(
+    "https://indexprueba-cb87f3.es.us-east-1.aws.elastic.cloud:443",
+    api_key="Q3VEYy1KWUJHdDB6RGdJR3gyc0g6cThLVzhJZS05eGxta0Q0NXQxTHYxZw=="
+)
+INDEX_NAME = "ucentral_test"
 
 @app.route('/')
 def index():
@@ -394,6 +402,165 @@ def logout():
     # Redirigir al index principal
     return redirect(url_for('index'))
 
+@app.route('/elasticAdmin')
+def elasticAdmin():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    try:
+        # Obtener información del índice
+        index_info = es_client.indices.get(index=INDEX_NAME)
+        doc_count = es_client.count(index=INDEX_NAME)['count']
+        
+        return render_template('gestion/ver_elasticAdmin.html',
+                            index_name=INDEX_NAME,
+                            doc_count=doc_count,
+                            version=VERSION_APP,
+                            creador=CREATOR_APP,
+                            usuario=session['usuario'])
+    except Exception as e:
+        return render_template('gestion/ver_elasticAdmin.html',
+                            error_message=f'Error al conectar con Elasticsearch: {str(e)}',
+                            version=VERSION_APP,
+                            creador=CREATOR_APP,
+                            usuario=session['usuario'])
+
+@app.route('/elastic-agregar-documentos', methods=['GET', 'POST'])
+def elastic_agregar_documentos():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        try:
+            if 'zipFile' not in request.files:
+                return render_template('gestion/elastic_agregar_documentos.html',
+                                    error_message='No se ha seleccionado ningún archivo',
+                                    index_name=INDEX_NAME,
+                                    version=VERSION_APP,
+                                    creador=CREATOR_APP,
+                                    usuario=session['usuario'])
+            
+            zip_file = request.files['zipFile']
+            if zip_file.filename == '':
+                return render_template('gestion/elastic_agregar_documentos.html',
+                                    error_message='No se ha seleccionado ningún archivo',
+                                    index_name=INDEX_NAME,
+                                    version=VERSION_APP,
+                                    creador=CREATOR_APP,
+                                    usuario=session['usuario'])
+            
+            # Crear directorio temporal
+            temp_dir = os.path.join(os.path.dirname(__file__), 'temp')
+            os.makedirs(temp_dir, exist_ok=True)
+            
+            # Guardar y extraer el archivo ZIP
+            zip_path = os.path.join(temp_dir, zip_file.filename)
+            zip_file.save(zip_path)
+            
+            with zipfile.ZipFile(zip_path) as zip_ref:
+                zip_ref.extractall(temp_dir)
+            
+            # Procesar archivos JSON
+            success_count = 0
+            error_count = 0
+            
+            for root, _, files in os.walk(temp_dir):
+                for file in files:
+                    if file.endswith('.json'):
+                        file_path = os.path.join(root, file)
+                        try:
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                json_data = json.load(f)
+                                if isinstance(json_data, list):
+                                    for doc in json_data:
+                                        es_client.index(index=INDEX_NAME, document=doc)
+                                        success_count += 1
+                                else:
+                                    es_client.index(index=INDEX_NAME, document=json_data)
+                                    success_count += 1
+                        except Exception as e:
+                            error_count += 1
+                            print(f"Error procesando {file}: {str(e)}")
+            
+            # Limpiar archivos temporales
+            for root, dirs, files in os.walk(temp_dir, topdown=False):
+                for file in files:
+                    os.remove(os.path.join(root, file))
+                for dir in dirs:
+                    os.rmdir(os.path.join(root, dir))
+            os.rmdir(temp_dir)
+            
+            return render_template('gestion/elastic_agregar_documentos.html',
+                                success_message=f'Se indexaron {success_count} documentos exitosamente. Errores: {error_count}',
+                                index_name=INDEX_NAME,
+                                version=VERSION_APP,
+                                creador=CREATOR_APP,
+                                usuario=session['usuario'])
+            
+        except Exception as e:
+            return render_template('gestion/elastic_agregar_documentos.html',
+                                error_message=f'Error al procesar el archivo: {str(e)}',
+                                index_name=INDEX_NAME,
+                                version=VERSION_APP,
+                                creador=CREATOR_APP,
+                                usuario=session['usuario'])
+    
+    return render_template('gestion/elastic_agregar_documentos.html',
+                         index_name=INDEX_NAME,
+                         version=VERSION_APP,
+                         creador=CREATOR_APP,
+                         usuario=session['usuario'])
+
+@app.route('/elastic-listar-documentos')
+def elastic_listar_documentos():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    try:
+        # Obtener los primeros 100 documentos
+        response = es_client.search(
+            index=INDEX_NAME,
+            body={
+                "query": {"match_all": {}},
+                "size": 100
+            }
+        )
+        
+        documents = response['hits']['hits']
+        
+        return render_template('gestion/elastic_listar_documentos.html',
+                            index_name=INDEX_NAME,
+                            documents=documents,
+                            version=VERSION_APP,
+                            creador=CREATOR_APP,
+                            usuario=session['usuario'])
+    except Exception as e:
+        return render_template('gestion/elastic_listar_documentos.html',
+                            error_message=f'Error al obtener documentos: {str(e)}',
+                            index_name=INDEX_NAME,
+                            version=VERSION_APP,
+                            creador=CREATOR_APP,
+                            usuario=session['usuario'])
+
+@app.route('/elastic-eliminar-documento', methods=['POST'])
+def elastic_eliminar_documento():
+    if 'usuario' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    
+    try:
+        doc_id = request.form.get('doc_id')
+        if not doc_id:
+            return jsonify({'error': 'ID de documento no proporcionado'}), 400
+        
+        response = es_client.delete(index=INDEX_NAME, id=doc_id)
+        
+        if response['result'] == 'deleted':
+            return jsonify({'success': True})
+        else:
+            return jsonify({'error': 'Error al eliminar el documento'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
