@@ -627,7 +627,7 @@ def buscador():
             )
 
             # Preparar los resultados para la plantilla
-            hits = response['hits']['hits']
+            hits         = response['hits']['hits']
             aggregations = response['aggregations']
 
             return render_template('buscador.html',

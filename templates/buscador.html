@@ -109,12 +109,14 @@
                                     <div class="accordion-body">
                                         {% if agg_name == 'Fecha' %}
                                             {% for bucket in agg_data.buckets %}
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="{{ bucket.key }}" id="{{ agg_name }}_{{ bucket.key }}">
-                                                <label class="form-check-label" for="{{ agg_name }}_{{ bucket.key }}">
-                                                    {{ bucket.key }} ({{ bucket.doc_count }})
-                                                </label>
-                                            </div>
+                                                {% if bucket.doc_count>0 %}
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" value="{{ bucket.key_as_string }}" id="{{ agg_name }}_{{ bucket.key_as_string }}">
+                                                        <label class="form-check-label" for="{{ agg_name }}_{{ bucket.key_as_string }}">
+                                                            {{ bucket.key_as_string }} ({{ bucket.doc_count }})
+                                                        </label>
+                                                    </div>
+                                                {% endif %}
                                             {% endfor %}
                                         {% else %}
                                             {% for bucket in agg_data.buckets %}
