@@ -7,10 +7,6 @@ from datetime import datetime
 import json
 import re
 from elasticsearch import Elasticsearch
-from dotenv import load_dotenv
-
-# Cargar variables de entorno
-load_dotenv()
 
 app = Flask(__name__)
 
