@@ -17,7 +17,7 @@ def inject_now():
     return {'now': datetime.now}
 
 # Versión de la aplicación
-VERSION_APP = "Versión 2.1 del Mayo 22 del 2025"
+VERSION_APP = "Versión 2.2 del Mayo 22 del 2025"
 CREATOR_APP = "Nombre del creador/ruta github"
 mongo_uri   = os.environ.get("MONGO_URI")
 
@@ -73,7 +73,7 @@ def login():
             security_collection = db['seguridad']
             usuario = request.form['usuario']
             password = request.form['password']
-            
+            print('Mongo buscando usuario:[',usuario,'], contraseña:[',password,']')
             # Verificar credenciales en MongoDB
             user = security_collection.find_one({
                 'usuario': usuario,
