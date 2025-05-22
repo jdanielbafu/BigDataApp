@@ -193,17 +193,17 @@
         });
 
         // Inicializar DataTable si hay resultados
-        {% if hits %}
         $(document).ready(function() {
-            $('#resultadosTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
-                },
-                pageLength: 10,
-                order: [[3, 'desc']]
-            });
+            if (document.getElementById('resultadosTable')) {
+                $('#resultadosTable').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
+                    },
+                    pageLength: 10,
+                    order: [[3, 'desc']]
+                });
+            }
         });
-        {% endif %}
     </script>
 </body>
 </html> 

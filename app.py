@@ -61,12 +61,13 @@ def login():
         # Primero verificar la conectividad con MongoDB
         client = connect_mongo()
         if not client:
-            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.', version=VERSION_APP,creador=CREATOR_APP)        
+            return render_template('login.html', error_message='Error de conexión con la base de datos. Por favor, intente más tarde.', version=VERSION_APP,creador=CREATOR_APP)
+        
         try:
-            db                  = client['administracion']
+            db = client['administracion']
             security_collection = db['seguridad']
-            usuario             = request.form['usuario']
-            password            = request.form['password']
+            usuario = request.form['usuario']
+            password = request.form['password']
             
             # Verificar credenciales en MongoDB
             user = security_collection.find_one({
@@ -85,6 +86,32 @@ def login():
             client.close()
     
     return render_template('login.html', version=VERSION_APP,creador=CREATOR_APP)
+
+@app.route('/listar-usuarios')
+def listar_usuarios():
+    try:
+        client = connect_mongo()
+        if not client:
+            return jsonify({'error': 'Error de conexión con la base de datos'}), 500
+        
+        db = client['administracion']
+        security_collection = db['seguridad']
+        
+        # Obtener todos los usuarios, excluyendo la contraseña por seguridad
+        #usuarios = list(security_collection.find({}, {'password': 0}))
+
+        usuarios = list(security_collection.find())
+        
+        # Convertir ObjectId a string para serialización JSON
+        for usuario in usuarios:
+            usuario['_id'] = str(usuario['_id'])
+        
+        return jsonify(usuarios)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if 'client' in locals():
+            client.close()
 
 @app.route('/gestion_proyecto', methods=['GET', 'POST'])
 def gestion_proyecto():
@@ -127,32 +154,6 @@ def gestion_proyecto():
                             version=VERSION_APP,
                             creador=CREATOR_APP,
                             usuario=session['usuario'])
-
-@app.route('/listar-usuarios')
-def listar_usuarios():
-    try:
-        client = connect_mongo()
-        if not client:
-            return jsonify({'error': 'Error de conexión con la base de datos'}), 500
-        
-        db = client['administracion']
-        security_collection = db['seguridad']
-        
-        # Obtener todos los usuarios, excluyendo la contraseña por seguridad
-        #usuarios = list(security_collection.find({}, {'password': 0}))
-
-        usuarios = list(security_collection.find())
-        
-        # Convertir ObjectId a string para serialización JSON
-        for usuario in usuarios:
-            usuario['_id'] = str(usuario['_id'])
-        
-        return jsonify(usuarios)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    finally:
-        if 'client' in locals():
-            client.close()
 
 @app.route('/crear-coleccion-form/<database>')
 def crear_coleccion_form(database):
@@ -551,6 +552,12 @@ def buscador():
             fecha_desde = request.form.get('fecha_desde')
             fecha_hasta = request.form.get('fecha_hasta')
 
+            # Establecer fechas por defecto si están vacías
+            if not fecha_desde:
+                fecha_desde = "1500-01-01"
+            if not fecha_hasta:
+                fecha_hasta = datetime.now().strftime("%Y-%m-%d")
+
             # Construir la consulta base
             query = {
                 "query": {
@@ -601,20 +608,17 @@ def buscador():
                     {"match": {search_type: search_text}}
                 )
 
-            # Agregar rango de fechas si están presentes
-            if fecha_desde or fecha_hasta:
-                range_query = {
-                    "range": {
-                        "fecha": {
-                            "format": "yyyy-MM-dd"
-                        }
+            # Agregar rango de fechas
+            range_query = {
+                "range": {
+                    "fecha": {
+                        "format": "yyyy-MM-dd",
+                        "gte": fecha_desde,
+                        "lte": fecha_hasta
                     }
                 }
-                if fecha_desde:
-                    range_query["range"]["fecha"]["gte"] = fecha_desde
-                if fecha_hasta:
-                    range_query["range"]["fecha"]["lte"] = fecha_hasta
-                query["query"]["bool"]["must"].append(range_query)
+            }
+            query["query"]["bool"]["must"].append(range_query)
 
             # Ejecutar la búsqueda en Elasticsearch
             response = client.search(
