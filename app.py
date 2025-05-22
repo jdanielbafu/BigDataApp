@@ -13,10 +13,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
+
 
 # Versión de la aplicación
-VERSION_APP = "Versión 1.3 del Mayo 15 del 2025"
+VERSION_APP = "Versión 2.1 del Mayo 22 del 2025"
 #
 CREATOR_APP = "Nombre del creador/ruta github"
 
@@ -40,8 +40,8 @@ def connect_mongo():
 
 # Configuración de Elasticsearch
 client = Elasticsearch(
-    os.getenv('ELASTICSEARCH_URL'),
-    api_key=os.getenv('ELASTICSEARCH_API_KEY')
+    "https://indexprueba-cb87f3.es.us-east-1.aws.elastic.cloud:443",
+    api_key="Q3VEYy1KWUJHdDB6RGdJR3gyc0g6cThLVzhJZS05eGxta0Q0NXQxTHYxZw=="
 )
 INDEX_NAME = "ucentral_test"
 
