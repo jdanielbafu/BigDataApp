@@ -2,3 +2,6 @@ Flask
 pymongo
 gunicorn
 elasticSearch
+flask==2.3.3
+elasticsearch==8.9.0
+python-dotenv==1.0.0

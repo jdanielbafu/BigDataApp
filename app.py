@@ -7,6 +7,10 @@ from datetime import datetime
 import json
 import re
 from elasticsearch import Elasticsearch
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
@@ -35,9 +39,9 @@ def connect_mongo():
         return None
 
 # Configuración de Elasticsearch
-es_client = Elasticsearch(
-    "https://indexprueba-cb87f3.es.us-east-1.aws.elastic.cloud:443",
-    api_key="Q3VEYy1KWUJHdDB6RGdJR3gyc0g6cThLVzhJZS05eGxta0Q0NXQxTHYxZw=="
+client = Elasticsearch(
+    os.getenv('ELASTICSEARCH_URL'),
+    api_key=os.getenv('ELASTICSEARCH_API_KEY')
 )
 INDEX_NAME = "ucentral_test"
 
@@ -409,8 +413,8 @@ def elasticAdmin():
     
     try:
         # Obtener información del índice
-        index_info = es_client.indices.get(index=INDEX_NAME)
-        doc_count = es_client.count(index=INDEX_NAME)['count']
+        index_info = client.indices.get(index=INDEX_NAME)
+        doc_count = client.count(index=INDEX_NAME)['count']
         
         return render_template('gestion/ver_elasticAdmin.html',
                             index_name=INDEX_NAME,
@@ -473,10 +477,10 @@ def elastic_agregar_documentos():
                                 json_data = json.load(f)
                                 if isinstance(json_data, list):
                                     for doc in json_data:
-                                        es_client.index(index=INDEX_NAME, document=doc)
+                                        client.index(index=INDEX_NAME, document=doc)
                                         success_count += 1
                                 else:
-                                    es_client.index(index=INDEX_NAME, document=json_data)
+                                    client.index(index=INDEX_NAME, document=json_data)
                                     success_count += 1
                         except Exception as e:
                             error_count += 1
@@ -518,7 +522,7 @@ def elastic_listar_documentos():
     
     try:
         # Obtener los primeros 100 documentos
-        response = es_client.search(
+        response = client.search(
             index=INDEX_NAME,
             body={
                 "query": {"match_all": {}},
@@ -552,13 +556,30 @@ def elastic_eliminar_documento():
         if not doc_id:
             return jsonify({'error': 'ID de documento no proporcionado'}), 400
         
-        response = es_client.delete(index=INDEX_NAME, id=doc_id)
+        response = client.delete(index=INDEX_NAME, id=doc_id)
         
         if response['result'] == 'deleted':
             return jsonify({'success': True})
         else:
             return jsonify({'error': 'Error al eliminar el documento'}), 500
             
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/search', methods=['POST'])
+def search():
+    try:
+        data = request.get_json()
+        index_name = data.get('index', 'ucentral_test')
+        query = data.get('query')
+
+        # Ejecutar la búsqueda en Elasticsearch
+        response = client.search(
+            index=index_name,
+            body=query
+        )
+
+        return jsonify(response)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
