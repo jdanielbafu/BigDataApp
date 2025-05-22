@@ -11,6 +11,11 @@ from elasticsearch import Elasticsearch
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
 
+# Agregar la función now al contexto de la plantilla
+@app.context_processor
+def inject_now():
+    return {'now': datetime.now}
+
 # Versión de la aplicación
 VERSION_APP = "Versión 2.1 del Mayo 22 del 2025"
 CREATOR_APP = "Nombre del creador/ruta github"
