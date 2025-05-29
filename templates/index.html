@@ -2,13 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-sca  le=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BigData-MiProyecto</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link href="{{ url_for('static', filename='css/landingPage.css') }}" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
+    <header class="header mb-4">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="h3 mb-0">BigData-MiProyecto</h1>
@@ -25,13 +25,21 @@
     </header>
 
     <div class="container">
-        <h1 class="text-center">
-            Bienvenidos al proyecto de BigData<BR> 
-                creado por XYZ<br> 
-                como parte de <br>
-                un proyecto de clase<br> 
-                En la maestría de Analítica de Datos <br>
-                De la Universidad Central</h1>
+        <div class="hero text-center mx-auto">
+            <div class="hero-icon mb-3">
+                <!-- Icono SVG decorativo -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-bar-chart-line" viewBox="0 0 16 16">
+                  <path d="M0 0h1v15h15v1H0V0zm10 10h1v3h-1v-3zm-3-4h1v7H7V6zm-3 3h1v4H4V9z"/>
+                </svg>
+            </div>
+            <h1 class="mb-3 fw-bold" style="color:#312e81;">
+                Bienvenidos al proyecto de BigData
+            </h1>
+            <p class="lead mb-1">Creado por <strong>Juan Daniel Barragán</strong></p>
+            <p class="mb-1">Como parte de un proyecto de clase</p>
+            <p class="mb-1">En la maestría de Analítica de Datos</p>
+            <p class="mb-0">De la Universidad Central</p>
+        </div>
     </div>
 
     <footer class="text-center">
@@ -45,4 +53,4 @@
         document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
 </body>
-</html> 
+</html>
