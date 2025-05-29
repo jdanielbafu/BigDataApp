@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from flask_mail import Mail, Message
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import zipfile
@@ -10,6 +11,15 @@ from elasticsearch import Elasticsearch
 
 app = Flask(__name__)
 app.secret_key = '900727Flask*'  # Cambia esto por una clave secreta segura
+
+# Configuración de Flask-Mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'tu_correo@gmail.com'
+app.config['MAIL_PASSWORD'] = 'tu_contraseña_de_aplicacion'  # Usa una contraseña de aplicación si usas Gmail
+
+mail = Mail(app)
 
 # Agregar la función now al contexto de la plantilla
 @app.context_processor
@@ -57,9 +67,24 @@ def about():
 @app.route('/contacto', methods=['GET', 'POST'])
 def contacto():
     if request.method == 'POST':
-        # Aquí va la lógica para procesar el formulario de contacto
-        return redirect(url_for('contacto'))
-    return render_template('contacto.html', version=VERSION_APP,creador=CREATOR_APP)
+        nombre = request.form['nombre']
+        email = request.form['email']
+        asunto = request.form['asunto']
+        mensaje = request.form['mensaje']
+
+        msg = Message(
+            subject=f"Contacto: {asunto}",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=['jbarraganf@ucentral.edu.co'], 
+            body=f"Nombre: {nombre}\nCorreo: {email}\n\nMensaje:\n{mensaje}"
+        )
+        try:
+            mail.send(msg)
+            flash('Mensaje enviado correctamente.', 'success')
+        except Exception as e:
+            flash('Error al enviar el mensaje.', 'danger')
+        return redirect('/contacto')
+    return render_template('contacto.html', creador='Juan Daniel Barragán', version='1.0')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -130,7 +155,7 @@ def gestion_proyecto():
         # Obtener lista de bases de datos
         databases = client.list_database_names()
         # Eliminar bases de datos del sistema
-        system_dbs = ['admin', 'local', 'config']
+        system_dbs = ['admin', 'local', 'config', 'administracion']
         databases = [db for db in databases if db not in system_dbs]
         
         selected_db = request.form.get('database') if request.method == 'POST' else request.args.get('database')
