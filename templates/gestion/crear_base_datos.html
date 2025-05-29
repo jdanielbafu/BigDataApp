@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Base de Datos - Gestor de BigData</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link href="{{ url_for('static', filename='css/gestor.css') }}" rel="stylesheet">
+    <!-- Cambia gestor.css por landingPage.css -->
+    <link href="{{ url_for('static', filename='css/landingPage.css') }}" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
+    <header class="header mb-4">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
                 <h2 class="h3 mb-0">BigData-MiProyecto <b>[{{ usuario }}]</b></h2>
@@ -26,11 +27,12 @@
     <div class="container mt-4">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Crear Nueva Base de Datos</h3>
+                <!-- Cambia 'card' por 'hero' para aplicar el nuevo estilo -->
+                <div class="hero">
+                    <div class="mb-4">
+                        <h3 class="fw-bold" style="color:#312e81;">Crear Nueva Base de Datos</h3>
                     </div>
-                    <div class="card-body">
+                    <div>
                         {% if error_message %}
                         <div class="alert alert-danger" role="alert">
                             {{ error_message }}
@@ -82,4 +84,3 @@
         });
     </script>
 </body>
-</html> 
