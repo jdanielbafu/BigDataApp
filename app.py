@@ -9,7 +9,7 @@ import re
 from elasticsearch import Elasticsearch
 
 app = Flask(__name__)
-app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto por una clave secreta segura
+app.secret_key = '900727Flask*'  # Cambia esto por una clave secreta segura
 
 # Agregar la función now al contexto de la plantilla
 @app.context_processor
@@ -18,13 +18,15 @@ def inject_now():
 
 # Versión de la aplicación
 VERSION_APP = "Versión 2.2 del Mayo 22 del 2025"
-CREATOR_APP = "Nombre del creador/ruta github"
+CREATOR_APP = "jdanielbafu"
 mongo_uri   = os.environ.get("MONGO_URI")
 
+#cambio en el mongo para poner datos de conexión 
 if not mongo_uri:
     #uri = "mongodb+srv://DbCentral:DbCentral2025@cluster0.vhltza7.mongodb.net/?appName=Cluster0"
-    uri         = "mongodb+srv://DbCentral:DbCentral2025@cluster0.vhltza7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    uri = "mongodb+srv://DBCentral:900727Ucentral*@cluster0.ecxa49z.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
     mongo_uri   = uri
+
 
 # Función para conectar a MongoDB
 def connect_mongo():
@@ -39,10 +41,10 @@ def connect_mongo():
 
 # Configuración de Elasticsearch
 client = Elasticsearch(
-    "https://indexprueba-cb87f3.es.us-east-1.aws.elastic.cloud:443",
-    api_key="Q3VEYy1KWUJHdDB6RGdJR3gyc0g6cThLVzhJZS05eGxta0Q0NXQxTHYxZw=="
+    "https://my-elasticsearch-project-cfbbfd.es.us-east-1.aws.elastic.cloud:443",
+    api_key="c0s3WkdaY0JXblU2a2xtVDVTN0E6OVZOZ1NOdjFnckZlQUVTVzljWmd5Zw=="
 )
-INDEX_NAME = "ucentral_test"
+INDEX_NAME = "ucental"
 
 @app.route('/')
 def index():
