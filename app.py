@@ -64,29 +64,6 @@ def index():
 def about():
     return render_template('about.html', version=VERSION_APP,creador=CREATOR_APP)
 
-@app.route('/contacto', methods=['GET', 'POST'])
-def contacto():
-    if request.method == 'POST':
-        nombre = request.form['nombre']
-        email = request.form['email']
-        asunto = request.form['asunto']
-        mensaje = request.form['mensaje']
-
-        msg = Message(
-            subject=f"Contacto: {asunto}",
-            sender=app.config['MAIL_USERNAME'],
-            recipients=['jbarraganf@ucentral.edu.co'], 
-            body=f"Nombre: {nombre}\nCorreo: {email}\n\nMensaje:\n{mensaje}"
-        )
-        try:
-            mail.send(msg)
-            flash('Mensaje enviado correctamente.', 'success')
-        except Exception as e:
-            flash('Error al enviar el mensaje.', 'danger')
-        return redirect('/contacto')
-    return render_template('contacto.html', creador='Juan Daniel Barragán', version='1.0')
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
