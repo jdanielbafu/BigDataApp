@@ -16,8 +16,8 @@ app.secret_key = '900727Flask*'  # Cambia esto por una clave secreta segura
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'tu_correo@gmail.com'
-app.config['MAIL_PASSWORD'] = 'tu_contraseña_de_aplicacion'  # Usa una contraseña de aplicación si usas Gmail
+app.config['MAIL_USERNAME'] = 'jbarraganf@gmail.com'
+#app.config['MAIL_PASSWORD'] = 'tu_contraseña_de_aplicacion'  # Usa una contraseña de aplicación si usas Gmail
 
 mail = Mail(app)
 
@@ -699,6 +699,43 @@ def search():
         return jsonify(response)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/contacto', methods=['GET', 'POST'])
+def contacto():
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        email = request.form['email']
+        asunto = request.form['asunto']
+        mensaje = request.form['mensaje']
+
+        try:
+            # Conectar a MongoDB
+            client = connect_mongo()
+            if not client:
+                flash('Error de conexión con la base de datos.', 'danger')
+                return redirect('/contacto')
+
+            # Usar base de datos y colección para contactos
+            db = client['bigdata_app']  # Cambia el nombre si prefieres otro
+            contactos = db['contactos']
+
+            # Insertar el documento (Mongo crea la base/colección si no existen)
+            contacto_doc = {
+                'nombre': nombre,
+                'email': email,
+                'asunto': asunto,
+                'mensaje': mensaje
+            }
+            contactos.insert_one(contacto_doc)
+            flash('Mensaje registrado correctamente.', 'success')
+        except Exception as e:
+            flash(f'Error al registrar el mensaje: {str(e)}', 'danger')
+        finally:
+            if 'client' in locals():
+                client.close()
+        return redirect('/contacto')
+    return render_template('contacto.html', creador='Juan Daniel Barragán', version='1.0')
 
 if __name__ == '__main__':
     app.run(debug=True)
