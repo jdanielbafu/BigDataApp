@@ -8,6 +8,7 @@ from datetime import datetime
 import json
 import re
 from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk
 
 app = Flask(__name__)
 app.secret_key = '900727Flask*'  # Cambia esto por una clave secreta segura
@@ -454,7 +455,9 @@ def elastic_agregar_documentos():
             # Procesar archivos JSON
             success_count = 0
             error_count = 0
-            
+            bulk_actions = []
+            error_files = []
+
             for root, _, files in os.walk(temp_dir):
                 for file in files:
                     if file.endswith('.json'):
@@ -464,15 +467,30 @@ def elastic_agregar_documentos():
                                 json_data = json.load(f)
                                 if isinstance(json_data, list):
                                     for doc in json_data:
-                                        client.index(index=INDEX_NAME, document=doc)
-                                        success_count += 1
+                                        bulk_actions.append({
+                                            "_index": INDEX_NAME,
+                                            "_source": doc
+                                        })
                                 else:
-                                    client.index(index=INDEX_NAME, document=json_data)
-                                    success_count += 1
+                                    bulk_actions.append({
+                                        "_index": INDEX_NAME,
+                                        "_source": json_data
+                                    })
                         except Exception as e:
                             error_count += 1
-                            print(f"Error procesando {file}: {str(e)}")
-            
+                            error_files.append(f"{file}: {str(e)}")
+
+            # Ejecutar el bulk solo si hay documentos
+            if bulk_actions:
+                try:
+                    success, errors = bulk(client, bulk_actions)
+                    success_count = success
+                    error_count += len(errors)
+                    if errors:
+                        error_files.extend([str(err) for err in errors[:10]])
+                except Exception as e:
+                    error_files.append(f"Bulk error: {str(e)}")
+
             # Limpiar archivos temporales
             for root, dirs, files in os.walk(temp_dir, topdown=False):
                 for file in files:
@@ -481,8 +499,12 @@ def elastic_agregar_documentos():
                     os.rmdir(os.path.join(root, dir))
             os.rmdir(temp_dir)
             
+            msg = f'Se indexaron {success_count} documentos exitosamente. Errores: {error_count}'
+            if error_files:
+                msg += "<br>Archivos/errores:<br>" + "<br>".join(error_files[:10])
+
             return render_template('gestion/elastic_agregar_documentos.html',
-                                success_message=f'Se indexaron {success_count} documentos exitosamente. Errores: {error_count}',
+                                success_message=msg,
                                 index_name=INDEX_NAME,
                                 version=VERSION_APP,
                                 creador=CREATOR_APP,
