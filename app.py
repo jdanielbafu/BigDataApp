@@ -683,7 +683,7 @@ def buscador():
     return render_template('buscador.html',
                         version=VERSION_APP,
                         creador=CREATOR_APP)
-
+    
 @app.route('/api/search', methods=['POST'])
 def search():
     try:
