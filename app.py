@@ -619,7 +619,14 @@ def buscador():
                             "calendar_interval": "year",
                             "format": "yyyy"
                         }
-                    }
+                    },
+                    "content": {
+                        "terms": {
+                            "field": "categoria",
+                            "size": 10,
+                            "order": {"_key": "asc"}
+                        }
+                    },
                 }
             }
 
