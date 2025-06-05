@@ -752,5 +752,23 @@ def contacto():
         return redirect('/contacto')
     return render_template('contacto.html', creador='Juan Daniel Barragán', version='1.0')
 
+# Crear índice en Elasticsearch con la configuración deseada desde acá... se puede borrar
+try:
+    client.indices.create(
+        index=INDEX_NAME,
+        body={
+            "mappings": {
+                "properties": {
+                    "filename":    { "type": "keyword" },
+                    "content":     { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } } }
+                }
+            }
+        },
+        ignore=400  # Ignorar error si el índice ya existe
+    )
+    print(f"Índice '{INDEX_NAME}' verificado/creado exitosamente.")
+except Exception as e:
+    print(f"Error al crear el índice en Elasticsearch: {str(e)}")
+#Acá es la prueba
 if __name__ == '__main__':
     app.run(debug=True)
