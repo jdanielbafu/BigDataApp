@@ -622,7 +622,7 @@ def buscador():
                     },
                     "content": {
                         "terms": {
-                            "field": "content",
+                            "field": "content.keyword",
                             "size": 10,
                             "order": {"_key": "asc"}
                         }
