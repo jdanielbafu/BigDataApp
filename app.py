@@ -56,6 +56,8 @@ client = Elasticsearch(
 )
 INDEX_NAME = "ucental"
 
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100 MB, ajusta según tu necesidad
+
 @app.route('/')
 def index():
     return render_template('index.html', version=VERSION_APP,creador=CREATOR_APP)
@@ -452,7 +454,8 @@ def elastic_agregar_documentos():
             # Procesar archivos JSON
             success_count = 0
             error_count = 0
-            
+            error_files = []
+
             for root, _, files in os.walk(temp_dir):
                 for file in files:
                     if file.endswith('.json'):
@@ -469,8 +472,8 @@ def elastic_agregar_documentos():
                                     success_count += 1
                         except Exception as e:
                             error_count += 1
-                            print(f"Error procesando {file}: {str(e)}")
-            
+                            error_files.append(f"{file}: {str(e)}")
+
             # Limpiar archivos temporales
             for root, dirs, files in os.walk(temp_dir, topdown=False):
                 for file in files:
@@ -479,12 +482,16 @@ def elastic_agregar_documentos():
                     os.rmdir(os.path.join(root, dir))
             os.rmdir(temp_dir)
             
+            msg = f'Se indexaron {success_count} documentos exitosamente. Errores: {error_count}'
+            if error_files:
+                msg += "<br>Archivos con error:<br>" + "<br>".join(error_files[:10])  # Solo los primeros 10
+
             return render_template('gestion/elastic_agregar_documentos.html',
-                                success_message=f'Se indexaron {success_count} documentos exitosamente. Errores: {error_count}',
-                                index_name=INDEX_NAME,
-                                version=VERSION_APP,
-                                creador=CREATOR_APP,
-                                usuario=session['usuario'])
+                success_message=msg,
+                index_name=INDEX_NAME,
+                version=VERSION_APP,
+                creador=CREATOR_APP,
+                usuario=session['usuario'])
             
         except Exception as e:
             return render_template('gestion/elastic_agregar_documentos.html',
