@@ -629,7 +629,7 @@ def buscador():
                     },
                     "filename": {
                         "terms": {
-                            "field": "filename",
+                            "field": "filename.keyword",
                             "size": 14,
                             "order": {"_key": "asc"}
                         }
