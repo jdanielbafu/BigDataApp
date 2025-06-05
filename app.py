@@ -630,7 +630,7 @@ def buscador():
                     "filename": {
                         "terms": {
                             "field": "filename.keyword",
-                            "size": 14,
+                            "size": 10,
                             "order": {"_key": "asc"}
                         }
                     }
@@ -649,6 +649,14 @@ def buscador():
                         }
                     }
                 ])
+            elif search_type == 'content':
+                query["query"]["bool"]["must"].append(
+                    {"match": {"content": search_text}}
+                )
+            elif search_type == 'filename':
+                query["query"]["bool"]["must"].append(
+                    {"match": {"filename": search_text}}
+                )
             else:           #si no es una búsqueda por texto
                 search_text='*'+search_text+'*'
                 query["query"]["bool"]["must"].append(
