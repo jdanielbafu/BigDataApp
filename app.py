@@ -642,21 +642,21 @@ def buscador():
                 query["query"]["bool"]["must"].extend([
                     {
                         "match_phrase": {
-                            "texto": {
+                            "content": {
                                 "query": search_text,
                                 "slop": 1
                             }
                         }
                     }
                 ])
-            elif search_type == 'content':
-                query["query"]["bool"]["must"].append(
-                    {"match": {"content": search_text}}
-                )
-            elif search_type == 'filename':
-                query["query"]["bool"]["must"].append(
-                    {"match": {"filename": search_text}}
-                )
+            # elif search_type == 'content':
+            #     query["query"]["bool"]["must"].append(
+            #         {"match": {"content": search_text}}
+            #     )
+            # elif search_type == 'filename':
+            #     query["query"]["bool"]["must"].append(
+            #         {"match": {"filename": search_text}}
+            #     )
             else:           #si no es una búsqueda por texto
                 search_text='*'+search_text+'*'
                 query["query"]["bool"]["must"].append(
