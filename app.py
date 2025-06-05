@@ -702,7 +702,7 @@ def buscador():
 def search():
     try:
         data = request.get_json()
-        index_name = data.get('index', 'ucentral_test')
+        index_name = data.get('index', 'ucental')
         query = data.get('query')
 
         # Ejecutar la búsqueda en Elasticsearch
