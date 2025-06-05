@@ -627,6 +627,13 @@ def buscador():
                             "order": {"_key": "asc"}
                         }
                     },
+                    "filename": {
+                        "terms": {
+                            "field": "filename",
+                            "size": 14,
+                            "order": {"_key": "asc"}
+                        }
+                    }
                 }
             }
 
